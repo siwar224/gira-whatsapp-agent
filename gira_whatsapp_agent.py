@@ -51,6 +51,7 @@ from anthropic import AsyncAnthropic
 from codewords_client import AsyncCodewordsClient, logger, redis_client, run_service
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
+from structlog.contextvars import get_contextvars
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Configuration defaults (all overridable at runtime through /settings)
@@ -67,6 +68,7 @@ STALE_AFTER_S = 600                # inbound older than this = reconnect backlog
 HANDOFF_TTL_S = 12 * 3600          # after "I want a human", the agent stays quiet 12 h
 MAX_SWEEP_REPLIES = 20             # replies per maintenance run
 MAX_AGENT_STEPS = 8
+SERVICE_ID = "gira_whatsapp_agent_4a536e8e"  # this service on CodeWords: WhatsApp messages are routed here
 
 # ──────────────────────────────────────────────────────────────────────────────
 # GIRA business facts (mirrors D:\GIRA\src\content\*.ts — update both together)
@@ -639,9 +641,17 @@ class StatusResponse(BaseModel):
     gira_url: str
     answered_now: int = Field(0, description="Overdue conversations answered during this run")
     still_waiting: int = Field(0, description="Conversations still inside the team's reply window")
+    pair_code: str | None = Field(None, description="Type this in WhatsApp → Linked devices → Link with phone number instead (expires in ~30 s)")
+    message: str | None = Field(None, description="What happened when linking a number")
 
 
 class MaintenanceRequest(BaseModel):
+    phone_number: str | None = Field(
+        None,
+        description="To link or change the restaurant's WhatsApp number, type it in full (+33612345678) with the phone in hand. Leave empty otherwise.",
+        example="+33612345678",
+    )
+    force_repoint: bool = Field(False, description="Only if asked: take the number over even if it already feeds another bot")
     answer_overdue: bool = Field(True, description="Answer the messages the team left unanswered for too long")
 
 
@@ -649,8 +659,12 @@ class MaintenanceRequest(BaseModel):
 async def maintenance(req: MaintenanceRequest) -> StatusResponse:
     """Answer messages the team left unanswered for too long, and report the agent's status.
 
-    The scheduler calls this every 5 minutes.
+    The scheduler calls this every 5 minutes. Filling in phone_number links (or changes) the WhatsApp number.
     """
+    linked: ConnectResponse | None = None
+    # A scheduled run repeats its inputs every 5 minutes: never re-pair from one.
+    if req.phone_number and req.phone_number.strip() and get_contextvars().get("scheduled_request_id") is None:
+        linked = await connect(ConnectRequest(phone_number=req.phone_number, force_repoint=req.force_repoint))
     settings = await load_settings()
     counts = {"answered": 0, "waiting": 0}
     connection_status = None
@@ -670,6 +684,8 @@ async def maintenance(req: MaintenanceRequest) -> StatusResponse:
         gira_url=settings["gira_url"],
         answered_now=counts.get("answered", 0),
         still_waiting=counts.get("waiting", 0),
+        pair_code=linked.pair_code if linked else None,
+        message=linked.message if linked else None,
     )
 
 
@@ -692,7 +708,7 @@ async def connect(req: ConnectRequest) -> ConnectResponse:
     number = "".join(c for c in req.phone_number if c.isdigit() or c == "+")
     if not number.startswith("+") or len(number) < 9:
         raise HTTPException(status_code=400, detail="Use the full international number, e.g. +33612345678.")
-    service_id = req.service_id or os.environ.get("SERVICE_ID")
+    service_id = req.service_id or os.environ.get("SERVICE_ID") or SERVICE_ID
     if not service_id:
         raise HTTPException(status_code=400, detail="Pass service_id (this service's id).")
     service_path = f"{service_id}/webhook"

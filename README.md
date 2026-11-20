@@ -39,18 +39,20 @@ to the waiting list, through the same API the GIRA website uses. It runs on
 
 ## Setup (once)
 
-1. **Link the restaurant's number.** Run `POST /connect` with the full international number:
-   ```json
-   { "phone_number": "+33612345678", "service_id": "gira_whatsapp_agent_4a536e8e" }
-   ```
+1. **Link the restaurant's number.** Open the service in CodeWords
+   (https://codewords.agemo.ai/run/gira_whatsapp_agent_4a536e8e), type the full international
+   number in **phone_number** (e.g. `+33612345678`) and run it. The result shows a **pair_code**.
+   (Developers can call `POST /connect` with `{"phone_number": "+33…"}` instead.)
    Then on that phone, within ~30 seconds: **WhatsApp → Settings → Linked devices → Link a device →
    "Link with phone number instead"** and type the pairing code.
 2. **Start the 5-minute schedule** for `POST /` (CodeWords → [Scheduled](https://codewords.agemo.ai/scheduled),
    or `schedule_runs /create` with the request id of a `POST /` run and `rate(5 minutes)`).
+   Create it from a run with **phone_number left empty** (scheduled runs ignore it anyway, so they
+   never re-pair).
    Without it, delayed replies are never sent (instant mode, delay `0`, works without it).
 3. Send a message to the number from another phone and check the reply.
 
-To change number later, just run `/connect` with the new number (and unlink the old device on the
+To change number later, just run the form again with the new number (and unlink the old device on the
 old phone). The WhatsApp link is a CodeWords beta feature; help: support@codewords.ai.
 
 ## Keeping it in sync with the website
