@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ conversation.name or conversation.phone or "Guest" }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow"><a href="/admin/conversations">← Inbox</a></p>
+    <h1>{{ conversation.name or "Guest" }} <small class="muted">{{ conversation.phone | flag }} {{ conversation.phone or "" }}</small></h1>
+  </div>
+  <div class="actions">
+    {% include "_status.html" %}
+    {% if status in ('team', 'waiting', 'attention') %}
+    <form method="post" action="/admin/conversations/{{ conversation.id }}/hand-back">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" class="button button-quiet">Hand back to the host</button>
+    </form>
+    {% else %}
+    <form method="post" action="/admin/conversations/{{ conversation.id }}/take-over">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <button type="submit" class="button button-quiet">Take over</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+{% if conversation.attention_reason %}
+<p class="flash flash-error">Needs a person: {{ conversation.attention_reason }}</p>
+{% elif status == 'waiting' %}
+<p class="flash flash-warn">The guest is waiting for the team. The host steps in if nobody replies in time.</p>
+{% elif team_until %}
+<p class="muted small">With the team until {{ team_until | local_time }}.</p>
+{% endif %}
+
+<section class="thread card" aria-label="Messages">
+  {% for m in conversation.messages %}
+  <article class="bubble bubble-{{ m.role }}">
+    <header>{% if m.role == 'customer' %}{{ conversation.name or "Guest" }}{% elif m.role == 'agent' %}Host{% else %}Team{% endif %} · <time>{{ m.created_at | local_time }}</time></header>
+    <p>{{ m.text }}</p>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="card">
+  {% if window_open %}
+  <form method="post" action="/admin/conversations/{{ conversation.id }}/reply" class="composer">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="visually-hidden" for="reply">Reply as the team</label>
+    <textarea id="reply" name="text" rows="3" maxlength="4000" placeholder="Reply as the team… the host will stay out of this chat" required></textarea>
+    <button type="submit" class="button">Send</button>
+  </form>
+  {% else %}
+  <p class="muted">The guest last wrote more than 24 hours ago. WhatsApp allows a reply once they write again.</p>
+  {% endif %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const box = document.getElementById("reply");
+  setInterval(() => { if (!box || !box.value.trim()) location.reload(); }, 15000);
+  window.scrollTo(0, document.body.scrollHeight);
+</script>
+{% endblock %}

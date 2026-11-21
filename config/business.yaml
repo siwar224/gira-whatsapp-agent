@@ -1,0 +1,105 @@
+# Everything the agent knows about the restaurant. Edit this file to change the menu, hours,
+# tables or house rules — no code change needed. Restart the service to load it.
+
+name: GIRA — Pasta & Mare
+description: >
+  A small Italian kitchen. Pasta rolled by hand every morning (12 shapes), seafood bought at the
+  fish market at 6 a.m., twirled to order. 40 seats, never more.
+
+# One of: TN (Tunisia), MA (Morocco), FR (France), IT (Italy), DE (Germany), ES (Spain).
+# Sets how local phone numbers are read and which languages guests are expected to write in.
+country: FR
+timezone: Europe/Paris   # optional — defaults to the country's time zone
+currency: EUR
+
+contact:
+  address: 12 Rue de la Mer, 75000 Paris
+  map_url: https://www.google.com/maps/search/?api=1&query=12+Rue+de+la+Mer+Paris
+  phone: +33 1 00 00 00 00
+  email: ciao@gira.example
+  website: https://gira-lyart.vercel.app
+
+links:
+  booking: https://gira-lyart.vercel.app/prenota
+  manage_booking: https://gira-lyart.vercel.app/prenota/gestisci
+  build_your_plate: https://gira-lyart.vercel.app/crea-il-tuo
+
+# 0 = Monday … 6 = Sunday. An empty list means closed.
+opening_hours:
+  0: []
+  1: [["12:00", "14:30"], ["19:00", "22:30"]]
+  2: [["12:00", "14:30"], ["19:00", "22:30"]]
+  3: [["12:00", "14:30"], ["19:00", "22:30"]]
+  4: [["12:00", "14:30"], ["19:00", "23:00"]]
+  5: [["12:00", "15:00"], ["19:00", "23:00"]]
+  6: [["12:00", "15:30"]]
+
+menu:
+  note: The menu follows the market — a few dishes change every week.
+  categories:
+    - name: Pasta
+      intro: Made every morning, cooked to order.
+      items:
+        - { name: Spaghetti al pomodoro, price: 14, description: "San Marzano tomato, garlic confit, torn basil, a prawn on top" }
+        - { name: Linguine allo scoglio, price: 24, description: "Mussels, prawns, cherry tomatoes and garlic", tags: [Signature] }
+        - { name: Paccheri alla Norma, price: 16, description: "Fried aubergine, slow tomato sugo, ricotta salata", tags: [Vegetarian] }
+        - { name: Tagliatelle ai frutti di mare, price: 22, description: "Hand-cut ribbons, a white ragù of the day's catch, lemon zest" }
+    - name: Mare
+      intro: Whatever the boats brought in this morning.
+      items:
+        - { name: Gamberi all'aglio, price: 18, description: "Prawns seared with garlic, chilli and parsley, bread for the sauce" }
+        - { name: Cozze alla tarantina, price: 15, description: "Mussels in a spicy tomato broth, grilled sourdough" }
+        - { name: Frittura di paranza, price: 19, description: "Small fish of the day, lightly fried, lemon" }
+    - name: Antipasti
+      intro: To share while the water boils.
+      items:
+        - { name: Pomodorini e burrata, price: 12, description: "Sweet cherry tomatoes, creamy burrata, basil oil", tags: [Vegetarian] }
+        - { name: Bruschetta al pomodoro, price: 8, description: "Grilled bread, raw tomato, garlic, oregano", tags: [Vegan] }
+        - { name: Polpo e patate, price: 14, description: "Tender octopus, crushed potatoes, olives and parsley" }
+    - name: Dolci
+      intro: Something sweet to finish the turn.
+      items:
+        - { name: Tiramisù della casa, price: 8, description: "Mascarpone, espresso, savoiardi, cocoa" }
+        - { name: Panna cotta agli agrumi, price: 7, description: "Vanilla cream, citrus from Sicily" }
+        - { name: Cannolo siciliano, price: 6, description: "Crisp shell, sheep's ricotta, pistachio" }
+
+booking:
+  min_guests: 1
+  max_guests: 6
+  large_party: More than 6 guests? Ask them to call the restaurant so the team can set a long table.
+  days_ahead: 14
+  table_hold_minutes: 120
+  occasions: [birthday, anniversary, business]
+  areas:
+    window: By the tall windows
+    room: Main room, in the middle of it all
+    counter: Chef's counter, watch the pasta being twirled (pairs of stools)
+    terrace: Terrace, under the olive trees
+  tables:
+    - { id: C1, label: Counter 1, area: counter, seats: 2 }
+    - { id: C2, label: Counter 2, area: counter, seats: 2 }
+    - { id: C3, label: Counter 3, area: counter, seats: 2 }
+    - { id: "1", label: Table 1, area: window, seats: 4 }
+    - { id: "2", label: Table 2, area: window, seats: 2 }
+    - { id: "3", label: Table 3, area: room, seats: 4 }
+    - { id: "4", label: Table 4, area: room, seats: 6 }
+    - { id: "5", label: Table 5, area: room, seats: 2 }
+    - { id: "6", label: Table 6, area: room, seats: 2 }
+    - { id: "7", label: Table 7, area: room, seats: 4 }
+    - { id: "8", label: Table 8, area: terrace, seats: 4 }
+    - { id: "9", label: Table 9, area: terrace, seats: 2 }
+    - { id: "10", label: Table 10, area: terrace, seats: 2 }
+
+# Anything else the agent may tell guests.
+facts:
+  - "Crea il tuo — build your own plate online: choose a pasta (linguine, spaghetti or paccheri), a sauce (pomodoro, bianco, nero di seppia or pesto), up to three treasures from the sea and extras like burrata. Price and allergens update as you build."
+  - Plates built online can be pre-ordered with a booking from the manage-booking page, so the kitchen has them ready.
+  - Nothing is paid online — guests pay at the restaurant.
+  - Bookings are possible every 30 minutes; the last booking is 60 minutes before closing. Today, only from 30 minutes from now.
+  - Every booking gets a code like GIRA-XXXXXXXX, needed at the door and to manage or cancel the booking (no account).
+  - When a moment is full, guests can join the waiting list and are emailed when a table frees up.
+  - Personal details are deleted automatically after the evening.
+
+# Topics the agent must never bring up or recommend.
+never_mention:
+  - wine or any alcoholic drink

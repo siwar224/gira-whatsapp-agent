@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Playground{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Playground</p>
+    <h1>Talk to the host</h1>
+  </div>
+</div>
+<p class="flash flash-warn">Nothing is sent on WhatsApp, but bookings made here are real — cancel them afterwards.</p>
+
+<section class="thread card" aria-label="Messages">
+  {% for m in messages %}
+  <article class="bubble bubble-{{ m.role }}">
+    <header>{% if m.role == 'customer' %}You{% else %}Host{% endif %}</header>
+    <p>{{ m.text }}</p>
+  </article>
+  {% else %}
+  <p class="empty">Write as a guest would: “Bonjour, une table pour 2 samedi soir ?”, “Ciao, siete aperti lunedì?”, “3aslema, famma blassa l 4 ghodwa?”</p>
+  {% endfor %}
+</section>
+
+<section class="card">
+  <form method="post" action="/admin/playground" class="composer">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="visually-hidden" for="text">Message</label>
+    <textarea id="text" name="text" rows="2" maxlength="2000" placeholder="Your message as a guest" autofocus></textarea>
+    <div class="composer-side">
+      <label class="small">Guest phone <input name="phone" value="{{ phone }}" placeholder="+216 20 123 456"></label>
+      <button type="submit" class="button">Send</button>
+      <button type="submit" name="reset" value="true" class="button button-quiet" formnovalidate>Start over</button>
+    </div>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>window.scrollTo(0, document.body.scrollHeight);</script>
+{% endblock %}

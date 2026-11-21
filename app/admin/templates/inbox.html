@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Inbox</p>
+    <h1>Conversations</h1>
+  </div>
+  <nav class="filters" aria-label="Filter">
+    <a href="/admin/conversations" {% if not current %}aria-current="true"{% endif %}>All</a>
+    {% for key, label in status_labels.items() %}
+    <a href="/admin/conversations?status={{ key }}" {% if current == key %}aria-current="true"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+</div>
+<section class="card">
+  {% include "_conversation_list.html" with context %}
+</section>
+{% endblock %}
+{% block scripts %}
+<script>setTimeout(() => location.reload(), 20000);</script>
+{% endblock %}

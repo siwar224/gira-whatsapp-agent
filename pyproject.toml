@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gira-whatsapp-agent"
+version = "1.0.0"
+description = "A WhatsApp host for restaurants: answers guests in their language and manages their bookings."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "siwar224" }]
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.165,<1",
+  "uvicorn[standard]>=0.54,<1",
+  "pydantic>=2.14,<3",
+  "pydantic-settings>=2.16,<3",
+  "sqlalchemy[asyncio]>=2.1,<3",
+  "asyncpg>=0.32,<1",
+  "aiosqlite>=0.22,<1",
+  "alembic>=1.20,<2",
+  "httpx>=0.28,<1",
+  "anthropic>=2.12,<3",
+  "jinja2>=3.1,<4",
+  "itsdangerous>=2.2,<3",
+  "python-multipart>=0.0.34",
+  "phonenumbers>=9.0,<10",
+  "pyyaml>=6.0,<7",
+  "tzdata>=2026.6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9.2,<10",
+  "pytest-asyncio>=1.5,<2",
+  "respx>=0.23,<1",
+  "ruff>=0.17,<1",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+"app.admin" = ["templates/*.html", "static/*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+filterwarnings = ["error::DeprecationWarning:app.*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "ASYNC", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003", "B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "tests"]

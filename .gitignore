@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.history/
+.claude/
+.vscode/
+.idea/
+
+# Local data and secrets
+.env
+*.db
+*.db-journal

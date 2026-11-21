@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <p class="eyebrow">Overview</p>
+    <h1>{% if runtime.enabled %}The host is answering guests{% else %}The host is paused{% endif %}</h1>
+  </div>
+</div>
+
+<section class="stats" aria-label="Today">
+  <a class="stat" href="/admin/conversations?status=attention">
+    <span class="stat-value">{{ counts.attention }}</span><span class="stat-label">Need a person</span>
+  </a>
+  <a class="stat" href="/admin/conversations?status=waiting">
+    <span class="stat-value">{{ counts.waiting }}</span><span class="stat-label">Guests waiting for the team</span>
+  </a>
+  <a class="stat" href="/admin/conversations?status=team">
+    <span class="stat-value">{{ counts.team }}</span><span class="stat-label">Chats with the team</span>
+  </a>
+  <div class="stat">
+    <span class="stat-value">{{ counts.agent_replies_24h }}</span><span class="stat-label">Agent replies, last 24 h</span>
+  </div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>How the host behaves</h2>
+    <form method="post" action="/admin/settings" class="stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label class="switch">
+        <input type="checkbox" name="enabled" value="true" {% if runtime.enabled %}checked{% endif %}>
+        <span>Answer guests automatically</span>
+      </label>
+      <label>When the team has a chat, step in after
+        <span class="inline"><input type="number" name="reply_after_minutes" min="1" max="1440" value="{{ runtime.reply_after_minutes }}"> minutes without a reply</span>
+      </label>
+      <label>A chat stays with the team for
+        <span class="inline"><input type="number" name="takeover_hours" min="1" max="168" value="{{ runtime.takeover_hours }}"> hours after their last message</span>
+      </label>
+      <button type="submit" class="button">Save</button>
+    </form>
+    <p class="muted small">Every guest message is answered at once. When someone from the team writes in a chat —
+      from the WhatsApp Business app or from this inbox — the chat is theirs.</p>
+  </section>
+
+  <section class="card">
+    <h2>Connections</h2>
+    <dl class="facts">
+      <dt>WhatsApp</dt>
+      <dd>{% if settings.whatsapp_configured %}<span class="dot dot-ok"></span>Connected · number ID {{ settings.whatsapp_phone_number_id }}{% else %}<span class="dot dot-off"></span>Not configured{% endif %}</dd>
+      <dt>Claude</dt>
+      <dd>{% if settings.claude_configured %}<span class="dot dot-ok"></span>{{ settings.anthropic_model }} · effort {{ settings.anthropic_effort }}{% else %}<span class="dot dot-off"></span>No API key{% endif %}</dd>
+      <dt>Bookings</dt>
+      <dd>{{ settings.booking_api_url }}</dd>
+      <dt>Restaurant</dt>
+      <dd>{{ profile.country_info.flag }} {{ profile.country_info.name }} · {{ profile.timezone }}</dd>
+    </dl>
+  </section>
+</div>
+
+<section class="card">
+  <div class="card-head">
+    <h2>Latest conversations</h2>
+    <a href="/admin/conversations">Open the inbox →</a>
+  </div>
+  {% include "_conversation_list.html" with context %}
+</section>
+{% endblock %}

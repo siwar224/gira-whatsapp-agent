@@ -1,0 +1,19 @@
+{% set items = conversations if conversations is defined else recent %}
+{% if items %}
+<ul class="conversation-list">
+  {% for c in items %}
+  <li>
+    <a href="/admin/conversations/{{ c.id }}">
+      <span class="who">
+        <strong>{{ c.name or c.phone or "Guest" }}</strong>
+        <small>{{ c.phone | flag }} {{ c.phone or "" }}</small>
+      </span>
+      <span class="preview">{% if c.last_role == 'agent' %}Host: {% elif c.last_role == 'staff' %}Team: {% endif %}{{ c.last_text | truncate(90) }}</span>
+      <span class="meta">{% with status = c.status %}{% include "_status.html" %}{% endwith %}<time>{{ c.last_message_at | local_time }}</time></span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">No conversations yet. When a guest writes on WhatsApp, the chat appears here.</p>
+{% endif %}

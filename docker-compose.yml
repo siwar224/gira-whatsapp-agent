@@ -1,0 +1,35 @@
+# Local stack: the agent and a PostgreSQL database.
+#   cp .env.example .env   # fill in the secrets
+#   docker compose up --build
+services:
+  agent:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://gira:gira@db:5432/gira
+      AUTO_CREATE_SCHEMA: "false"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config:/app/config:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: gira
+      POSTGRES_PASSWORD: gira
+      POSTGRES_DB: gira
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gira -d gira"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
